@@ -19,8 +19,22 @@ namespace api.Mappers
                 Price = stockModel.Price,
                 LastDiv = stockModel.LastDiv,
                 Industry = stockModel.Industry,
-                marketCap = stockModel.marketCap,
+                marketCap = stockModel.MarketCap,
                 Date = stockModel.Date
+            };
+        }
+
+        public static Stock ToStockFromCreateDTO(this CreateStockDto stockDto)
+        {
+            return new Stock
+            {
+                Symbol = stockDto.Symbol,
+                Name = stockDto.Name,
+                Price = stockDto.Price,
+                LastDiv = stockDto.LastDiv,
+                Industry = stockDto.Industry,
+                MarketCap = stockDto.MarketCap,
+                Date = stockDto.Date
             };
         }
         
