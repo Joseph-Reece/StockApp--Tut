@@ -35,7 +35,6 @@ namespace api.Mappers
                 LastDiv = stockDto.LastDiv,
                 Industry = stockDto.Industry,
                 MarketCap = stockDto.MarketCap,
-                Date = stockDto.Date
             };
         }
         

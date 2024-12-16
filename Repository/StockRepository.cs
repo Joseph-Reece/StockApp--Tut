@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
 using api.Dtos.Stock;
+using api.Helpers;
 using api.Interfaces;
 using api.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -42,9 +43,52 @@ namespace api.Repository
             return stockModel;
         }
 
-        public async Task<List<Stock>> GetAllAsync()
+        public async Task<List<Stock>> GetAllAsync(StockQueryObject queryObject)
         {
-            return await _context.Stocks.Include(c => c.Comments).ToListAsync();
+            var stocks = _context.Stocks.Include(c => c.Comments).AsQueryable();
+
+            if(!string.IsNullOrWhiteSpace(queryObject.Symbol))
+            {
+                stocks = stocks.Where(x => x.Symbol.Contains(queryObject.Symbol));
+            }
+            if(!string.IsNullOrWhiteSpace(queryObject.Name))
+            {
+                stocks = stocks.Where(x => x.Name.Contains(queryObject.Name));
+            }
+                // Sorting the stocks
+            if(!string.IsNullOrWhiteSpace(queryObject.SortBy))
+            {
+                if (queryObject.SortBy.Equals("Symbol", StringComparison.OrdinalIgnoreCase))
+                {
+                    stocks = queryObject.IsDescending ? stocks.OrderByDescending(x => x.Symbol) : stocks.OrderBy(x => x.Symbol);
+                }
+                else if (queryObject.SortBy == "name")
+                {
+                    stocks = queryObject.IsDescending ? stocks.OrderByDescending(x => x.Name) : stocks.OrderBy(x => x.Name);
+                }
+                else if (queryObject.SortBy == "price")
+                {
+                    stocks = queryObject.IsDescending ? stocks.OrderByDescending(x => x.Price) : stocks.OrderBy(x => x.Price);
+                }
+                else if (queryObject.SortBy == "lastDiv")
+                {
+                    stocks = queryObject.IsDescending ? stocks.OrderByDescending(x => x.LastDiv) : stocks.OrderBy(x => x.LastDiv);
+                }
+                else if (queryObject.SortBy == "industry")
+                {
+                    stocks = queryObject.IsDescending ? stocks.OrderByDescending(x => x.Industry) : stocks.OrderBy(x => x.Industry);
+                }
+                else if (queryObject.SortBy == "marketCap")
+                {
+                    stocks = queryObject.IsDescending ? stocks.OrderByDescending(x => x.MarketCap) : stocks.OrderBy(x => x.MarketCap);
+                }
+            }
+
+            // Pagination
+            stocks = stocks.Skip((queryObject.PageNumber - 1) * queryObject.PageSize).Take(queryObject.PageSize);
+
+
+            return await stocks.ToListAsync();
         }
 
         public async Task<Stock?> GetByIdAsync(int id)
@@ -73,7 +117,6 @@ namespace api.Repository
             stockModel.LastDiv = updateStockDto.LastDiv;
             stockModel.Industry = updateStockDto.Industry;
             stockModel.MarketCap = updateStockDto.MarketCap;
-            stockModel.Date = updateStockDto.Date;
             await _context.SaveChangesAsync();
 
             return stockModel;
