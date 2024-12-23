@@ -21,7 +21,8 @@ namespace api.Models
         public long MarketCap { get; set; }
         public DateTime Date { get; set; } = DateTime.Now;
 
-        public List<Comment> Comments { get; set; } = new List<Comment>();
+        public List<Comment> Comments { get; set; } = [];
+        public List<Portfolio> Portfolios { get; set; } = [];
 
     }
 }
